@@ -251,8 +251,21 @@ body {
 /* Content Area */
 .content-area {
     flex: 1;
+    min-height: 0;
     position: relative;
     overflow: hidden;
+    height: calc(100vh - 200px); /* Adjusted for mobile layout */
+}
+
+.webview-container {
+    height: 100%;
+    width: 100%;
+}
+
+.webview-container webview {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
 }
 
 /* Welcome Screen */
@@ -1209,4 +1222,17 @@ body {
     flex: 1;
     min-height: 0;
     position: relative;
+    overflow: hidden;
+    height: calc(100vh - 200px); /* Adjusted for mobile layout */
+}
+
+.webview-container {
+    height: 100%;
+    width: 100%;
+}
+
+.webview-container webview {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
 }
