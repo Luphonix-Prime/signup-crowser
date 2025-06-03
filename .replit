@@ -6,3 +6,19 @@ channel = "stable-24_05"
 
 [deployment]
 run = ["sh", "-c", "npm run start"]
+
+[workflows]
+runButton = "Start Electron App"
+
+[[workflows.workflow]]
+name = "Start Electron App"
+author = 43426059
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "export DISPLAY=:99"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm start"

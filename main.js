@@ -130,7 +130,7 @@ class PrivacyBrowser {
                 });
                 
                 // Create isolated session for this group
-                const sessionName = `tabgroup-${group.id}`;
+                const sessionName = 'tabgroup-' + group.id;
                 const isolatedSession = session.fromPartition(sessionName, { cache: false });
                 
                 // Configure session to not store history
