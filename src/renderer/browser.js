@@ -245,7 +245,9 @@ class BrowserManager {
 
     createWebviewElement(tabId) {
         const webview = document.createElement('webview');
-        webview.setAttribute('partition', `persist:tabgroup-${this.currentGroup?.id || 'default'}`);
+        webview.setAttribute('partition', `tabgroup-${this.currentGroup?.id || 'default'}`);
+        webview.setAttribute('allowpopups', 'true');
+        webview.setAttribute('webSecurity', 'false');
         webview.style.height = '100%';
         webview.style.width = '100%';
         webview.style.position = 'absolute';

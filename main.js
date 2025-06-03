@@ -257,8 +257,8 @@ class PrivacyBrowser {
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true,
-                preload: path.join(__dirname, 'preload.js'),
-                session: group.session
+                webviewTag: true,
+                preload: path.join(__dirname, 'preload.js')
             },
             titleBarStyle: 'hiddenInset'
         });
@@ -267,7 +267,16 @@ class PrivacyBrowser {
         
         // Send group data to browser window
         browserWindow.webContents.once('did-finish-load', () => {
-            browserWindow.webContents.send('group:loaded', group);
+            // Send only serializable data, excluding session and window references
+            const serializableGroup = {
+                id: group.id,
+                name: group.name,
+                description: group.description,
+                timerMinutes: group.timerMinutes,
+                userId: group.userId,
+                createdAt: group.createdAt
+            };
+            browserWindow.webContents.send('group:loaded', serializableGroup);
         });
 
         browserWindow.on('closed', () => {
