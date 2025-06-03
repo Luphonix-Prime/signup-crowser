@@ -26,6 +26,11 @@ class AuthManager {
             e.preventDefault();
             this.handleRegister();
         });
+
+        // Admin panel access
+        document.getElementById('admin-login-btn').addEventListener('click', () => {
+            this.handleAdminAccess();
+        });
     }
 
     switchForm(formType) {
@@ -67,7 +72,14 @@ class AuthManager {
             const result = await window.electronAPI.login(credentials);
             
             if (result.success) {
-                // Login successful - main window will open automatically
+                // Check if user is admin and redirect accordingly
+                if (result.user && result.user.role === 'admin') {
+                    // Open admin panel
+                    await window.electronAPI.openAdminPanel();
+                } else {
+                    // Open regular browser/dashboard
+                    await window.electronAPI.openBrowser();
+                }
                 this.showLoading(false);
             } else {
                 this.showError(result.error || 'Login failed');
@@ -181,6 +193,36 @@ class AuthManager {
             loadingElement.classList.remove('hidden');
         } else {
             loadingElement.classList.add('hidden');
+        }
+    }
+
+    async handleAdminAccess() {
+        const username = prompt('Enter admin username:');
+        const password = prompt('Enter admin password:');
+        
+        if (!username || !password) {
+            this.showError('Admin credentials required');
+            return;
+        }
+
+        this.showLoading(true);
+        this.clearError();
+
+        try {
+            const result = await window.electronAPI.adminLogin({ username, password });
+            
+            if (result.success) {
+                // Open admin panel directly
+                await window.electronAPI.openAdminPanel();
+                this.showLoading(false);
+            } else {
+                this.showError('Admin login failed: ' + (result.error || 'Invalid credentials'));
+                this.showLoading(false);
+            }
+        } catch (error) {
+            this.showError('Admin login error occurred');
+            this.showLoading(false);
+            console.error('Admin login error:', error);
         }
     }
 
