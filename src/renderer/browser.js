@@ -1,3 +1,4 @@
+
 class BrowserManager {
     constructor() {
         this.currentGroup = null;
@@ -7,207 +8,194 @@ class BrowserManager {
         this.timerInterval = null;
         this.webviews = new Map();
 
-        // Webview event handlers
-        this.handleWebviewLoadStart = this.handleWebviewLoadStart.bind(this);
-        this.handleWebviewLoadStop = this.handleWebviewLoadStop.bind(this);
-
         this.initializeEventListeners();
         this.setupIPC();
         
         // Initialize feather icons
-        feather.replace();
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
     }
 
     initializeEventListeners() {
-        // Navigation
-        document.getElementById('back-btn').addEventListener('click', () => this.goBack());
-        document.getElementById('forward-btn').addEventListener('click', () => this.goForward());
-        document.getElementById('refresh-btn').addEventListener('click', () => this.refresh());
-        
-        // Address bar
-        document.getElementById('url-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.navigate();
-            }
-        });
-        document.getElementById('go-btn').addEventListener('click', () => this.navigate());
-        
-        // Tab management
-        document.getElementById('new-tab-btn').addEventListener('click', () => this.createNewTab());
-        document.getElementById('add-tab-btn').addEventListener('click', () => this.createNewTab());
-        document.getElementById('close-group-btn').addEventListener('click', () => this.closeGroup());
-        
-        // Quick links
-        document.querySelectorAll('.quick-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                const url = e.currentTarget.dataset.url;
-                this.createNewTab(url);
+        // URL input enter key
+        const urlInput = document.getElementById('url-input');
+        if (urlInput) {
+            urlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.navigate();
+                }
             });
-        });
-        
-        // Timer alert
-        document.getElementById('extend-timer').addEventListener('click', () => this.extendTimer());
-        document.getElementById('dismiss-alert').addEventListener('click', () => this.dismissAlert());
+        }
     }
 
     setupIPC() {
-        // Listen for group data
-        window.electronAPI.onGroupLoaded((event, groupData) => {
-            this.loadGroup(groupData);
-        });
-        
-        // Listen for timer alerts
-        window.electronAPI.onTimerAlert((event, data) => {
-            this.showTimerAlert(data.message);
-        });
-    }
+        if (window.electronAPI) {
+            // Listen for group data
+            window.electronAPI.onGroupLoaded((event, groupData) => {
+                this.currentGroup = groupData;
+                this.updateGroupInfo();
+                this.startTimer();
+                this.createInitialTab();
+            });
 
-    loadGroup(groupData) {
-        this.currentGroup = groupData;
-        
-        // Update UI
-        document.getElementById('group-name').textContent = groupData.name;
-        document.getElementById('group-description').textContent = 
-            `Group: ${groupData.name} - Private browsing session with isolated cookies and no history.`;
-        
-        // Setup timer display
-        if (groupData.timerMinutes > 0) {
-            this.setupTimerDisplay(groupData.timerMinutes);
+            // Listen for timer alerts
+            window.electronAPI.onTimerAlert((event, data) => {
+                this.showTimerAlert(data.message);
+            });
+
+            // Listen for group closure
+            window.electronAPI.onGroupClosed((event, groupId) => {
+                if (this.currentGroup && this.currentGroup.id === groupId) {
+                    window.close();
+                }
+            });
         }
-        
-        // Create initial tab
-        this.createNewTab();
     }
 
-    setupTimerDisplay(minutes) {
-        const timerDisplay = document.getElementById('timer-display');
-        const timerText = document.getElementById('timer-text');
-        
-        timerDisplay.classList.remove('hidden');
-        
-        let timeLeft = minutes * 60; // Convert to seconds
-        
-        this.timerInterval = setInterval(() => {
-            timeLeft--;
-            
-            if (timeLeft <= 0) {
-                clearInterval(this.timerInterval);
-                timerText.textContent = '00:00';
-                return;
-            }
-            
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            timerText.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            
-            // Change color when time is running low
-            if (timeLeft <= 60) { // Last minute
-                timerDisplay.classList.add('timer-warning');
-            } else if (timeLeft <= 300) { // Last 5 minutes
-                timerDisplay.classList.add('timer-caution');
-            }
-        }, 1000);
+    updateGroupInfo() {
+        const groupNameEl = document.getElementById('group-name');
+        if (groupNameEl && this.currentGroup) {
+            groupNameEl.textContent = this.currentGroup.name;
+        }
     }
 
-    createNewTab(url = null) {
+    startTimer() {
+        if (this.currentGroup && this.currentGroup.timerMinutes > 0) {
+            const timerDisplay = document.getElementById('timer-display');
+            const timerText = document.getElementById('timer-text');
+            
+            if (timerDisplay && timerText) {
+                timerDisplay.classList.remove('hidden');
+                
+                let remainingMinutes = this.currentGroup.timerMinutes;
+                let remainingSeconds = 0;
+                
+                this.timerInterval = setInterval(() => {
+                    if (remainingSeconds > 0) {
+                        remainingSeconds--;
+                    } else if (remainingMinutes > 0) {
+                        remainingMinutes--;
+                        remainingSeconds = 59;
+                    } else {
+                        clearInterval(this.timerInterval);
+                        return;
+                    }
+                    
+                    const minutes = String(remainingMinutes).padStart(2, '0');
+                    const seconds = String(remainingSeconds).padStart(2, '0');
+                    timerText.textContent = `${minutes}:${seconds}`;
+                }, 1000);
+            }
+        }
+    }
+
+    createInitialTab() {
+        this.newTab('https://www.google.com');
+    }
+
+    newTab(url = null) {
         const tabId = ++this.tabCounter;
-        
         const tab = {
             id: tabId,
-            title: url ? 'Loading...' : 'New Tab',
+            title: 'New Tab',
             url: url || 'about:blank',
-            canGoBack: false,
-            canGoForward: false,
             isLoading: false
         };
-        
+
         this.tabs.push(tab);
+        this.activeTabId = tabId;
         this.renderTabs();
-        this.setActiveTab(tabId);
-        
+
         if (url) {
             this.navigateToUrl(url);
         } else {
             this.showWelcomeScreen();
         }
-        
+
         return tab;
     }
 
     renderTabs() {
-        const container = document.getElementById('tabs-container');
-        
-        container.innerHTML = this.tabs.map(tab => `
-            <div class="tab ${tab.id === this.activeTabId ? 'active' : ''}" data-tab-id="${tab.id}">
-                <div class="tab-content">
-                    <div class="tab-icon">
-                        ${tab.isLoading ? '<div class="tab-spinner"></div>' : '<i data-feather="globe"></i>'}
-                    </div>
-                    <span class="tab-title" title="${this.escapeHtml(tab.title)}">${this.escapeHtml(tab.title)}</span>
+        const tabsList = document.getElementById('tabs-list');
+        if (!tabsList) return;
+
+        tabsList.innerHTML = '';
+
+        this.tabs.forEach(tab => {
+            const tabEl = document.createElement('div');
+            tabEl.className = `tab ${tab.id === this.activeTabId ? 'active' : ''}`;
+            tabEl.innerHTML = `
+                <div class="tab-content" onclick="browserManager.switchTab(${tab.id})">
+                    ${tab.isLoading ? '<i data-feather="loader" class="loading"></i>' : '<i data-feather="globe"></i>'}
+                    <span class="tab-title">${tab.title}</span>
                 </div>
                 <button class="tab-close" onclick="browserManager.closeTab(${tab.id})" title="Close tab">
                     <i data-feather="x"></i>
                 </button>
-            </div>
-        `).join('');
-        
-        // Add event listeners
-        container.querySelectorAll('.tab').forEach(tabElement => {
-            const tabId = parseInt(tabElement.dataset.tabId);
-            tabElement.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('tab-close') && !e.target.closest('.tab-close')) {
-                    this.setActiveTab(tabId);
-                }
-            });
+            `;
+            tabsList.appendChild(tabEl);
         });
-        
-        feather.replace();
+
+        // Re-initialize feather icons for new elements
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
     }
 
-    setActiveTab(tabId) {
+    switchTab(tabId) {
         this.activeTabId = tabId;
-        const tab = this.tabs.find(t => t.id === tabId);
-        
-        if (!tab) return;
-        
-        // Update address bar
-        document.getElementById('url-input').value = tab.url === 'about:blank' ? '' : tab.url;
-        
-        // Update navigation buttons
-        document.getElementById('back-btn').disabled = !tab.canGoBack;
-        document.getElementById('forward-btn').disabled = !tab.canGoForward;
-        
-        // Update UI
         this.renderTabs();
-        
-        if (tab.url === 'about:blank') {
-            this.showWelcomeScreen();
-        } else {
+
+        // Hide all webviews
+        this.webviews.forEach(webview => {
+            webview.style.display = 'none';
+        });
+
+        // Show active webview or welcome screen
+        const activeWebview = this.webviews.get(tabId);
+        if (activeWebview) {
+            activeWebview.style.display = 'block';
             this.hideWelcomeScreen();
+            
+            // Update URL input
+            const urlInput = document.getElementById('url-input');
+            const activeTab = this.tabs.find(t => t.id === tabId);
+            if (urlInput && activeTab && activeTab.url !== 'about:blank') {
+                urlInput.value = activeTab.url;
+            }
+        } else {
+            this.showWelcomeScreen();
         }
-        
-        // Update window title
-        document.title = `${tab.title} - Privacy Browser`;
     }
 
     closeTab(tabId) {
         const tabIndex = this.tabs.findIndex(t => t.id === tabId);
         if (tabIndex === -1) return;
-        
+
+        // Remove webview
+        const webview = this.webviews.get(tabId);
+        if (webview) {
+            webview.remove();
+            this.webviews.delete(tabId);
+        }
+
+        // Remove tab
         this.tabs.splice(tabIndex, 1);
-        
-        // If this was the active tab, switch to another
+
+        // Handle active tab change
         if (this.activeTabId === tabId) {
             if (this.tabs.length > 0) {
-                const newActiveIndex = Math.max(0, tabIndex - 1);
-                this.setActiveTab(this.tabs[newActiveIndex].id);
+                // Switch to next tab or previous if it was the last
+                const newActiveIndex = tabIndex < this.tabs.length ? tabIndex : this.tabs.length - 1;
+                this.activeTabId = this.tabs[newActiveIndex].id;
+                this.switchTab(this.activeTabId);
             } else {
                 // No tabs left, create a new one
-                this.createNewTab();
-                return;
+                this.newTab();
             }
         }
-        
+
         this.renderTabs();
     }
 
@@ -230,7 +218,6 @@ class BrowserManager {
         this.navigateToUrl(url);
     }
 
-    // In navigateToUrl method
     navigateToUrl(url) {
         const activeTab = this.tabs.find(t => t.id === this.activeTabId);
         if (!activeTab) return;
@@ -243,52 +230,71 @@ class BrowserManager {
 
         webview.src = url;
         activeTab.url = url;
+        activeTab.isLoading = true;
+        
+        // Update URL input
+        const urlInput = document.getElementById('url-input');
+        if (urlInput) {
+            urlInput.value = url;
+        }
+
+        this.hideWelcomeScreen();
+        this.switchTab(activeTab.id);
         this.renderTabs();
     }
 
     createWebviewElement(tabId) {
         const webview = document.createElement('webview');
-        webview.setAttribute('partition', 'persist:electron-browser');
+        webview.setAttribute('partition', `persist:tabgroup-${this.currentGroup?.id || 'default'}`);
         webview.style.height = '100%';
         webview.style.width = '100%';
         webview.style.position = 'absolute';
+        webview.style.top = '0';
+        webview.style.left = '0';
         webview.style.zIndex = '1';
+        webview.style.display = 'none';
 
         // Add event listeners
-        webview.addEventListener('did-start-loading', this.handleWebviewLoadStart);
-        webview.addEventListener('did-stop-loading', this.handleWebviewLoadStop);
-        webview.addEventListener('dom-ready', () => {
-            activeTab.title = webview.getTitle();
-            this.renderTabs();
+        webview.addEventListener('did-start-loading', () => {
+            const tab = this.tabs.find(t => t.id === tabId);
+            if (tab) {
+                tab.isLoading = true;
+                this.renderTabs();
+            }
+        });
+
+        webview.addEventListener('did-stop-loading', () => {
+            const tab = this.tabs.find(t => t.id === tabId);
+            if (tab) {
+                tab.isLoading = false;
+                tab.title = webview.getTitle() || this.getTitleFromUrl(webview.src);
+                this.renderTabs();
+            }
+        });
+
+        webview.addEventListener('page-title-updated', () => {
+            const tab = this.tabs.find(t => t.id === tabId);
+            if (tab) {
+                tab.title = webview.getTitle() || this.getTitleFromUrl(webview.src);
+                this.renderTabs();
+            }
+        });
+
+        webview.addEventListener('did-navigate', (event) => {
+            const tab = this.tabs.find(t => t.id === tabId);
+            if (tab) {
+                tab.url = event.url;
+                if (this.activeTabId === tabId) {
+                    const urlInput = document.getElementById('url-input');
+                    if (urlInput) {
+                        urlInput.value = event.url;
+                    }
+                }
+            }
         });
 
         document.getElementById('webview-container').appendChild(webview);
         return webview;
-    }
-
-    handleWebviewLoadStart(event) {
-        const webview = event.target;
-        const tabId = Array.from(this.webviews.entries())
-            .find(([id, wv]) => wv === webview)[0];
-        
-        const tab = this.tabs.find(t => t.id === tabId);
-        if (tab) {
-            tab.isLoading = true;
-            this.renderTabs();
-        }
-    }
-
-    handleWebviewLoadStop(event) {
-        const webview = event.target;
-        const tabId = Array.from(this.webviews.entries())
-            .find(([id, wv]) => wv === webview)[0];
-
-        const tab = this.tabs.find(t => t.id === tabId);
-        if (tab) {
-            tab.isLoading = false;
-            tab.title = webview.getTitle();
-            this.renderTabs();
-        }
     }
 
     goBack() {
@@ -322,13 +328,19 @@ class BrowserManager {
     }
 
     showWelcomeScreen() {
-        document.getElementById('welcome-screen').classList.remove('hidden');
-        document.getElementById('webview-container').classList.add('hidden');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const webviewContainer = document.getElementById('webview-container');
+        
+        if (welcomeScreen) welcomeScreen.classList.remove('hidden');
+        if (webviewContainer) webviewContainer.classList.add('hidden');
     }
 
     hideWelcomeScreen() {
-        document.getElementById('welcome-screen').classList.add('hidden');
-        document.getElementById('webview-container').classList.remove('hidden');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const webviewContainer = document.getElementById('webview-container');
+        
+        if (welcomeScreen) welcomeScreen.classList.add('hidden');
+        if (webviewContainer) webviewContainer.classList.remove('hidden');
     }
 
     closeGroup() {
@@ -339,57 +351,37 @@ class BrowserManager {
     }
 
     showTimerAlert(message) {
-        document.getElementById('alert-text').textContent = message;
-        document.getElementById('timer-alert').classList.remove('hidden');
+        const alertText = document.getElementById('alert-text');
+        const timerAlert = document.getElementById('timer-alert');
+        
+        if (alertText) alertText.textContent = message;
+        if (timerAlert) timerAlert.classList.remove('hidden');
     }
 
     dismissAlert() {
-        document.getElementById('timer-alert').classList.add('hidden');
+        const timerAlert = document.getElementById('timer-alert');
+        if (timerAlert) timerAlert.classList.add('hidden');
     }
 
     async extendTimer() {
-        if (!this.currentGroup) return;
-        
-        try {
-            const result = await window.electronAPI.extendTimer(this.currentGroup.id);
-            
-            if (result.success) {
+        if (this.currentGroup && window.electronAPI) {
+            try {
+                await window.electronAPI.extendTimer(this.currentGroup.id);
                 this.dismissAlert();
-                // Reset timer display
-                if (this.currentGroup.timerMinutes > 0) {
+                // Restart the timer display
+                if (this.timerInterval) {
                     clearInterval(this.timerInterval);
-                    this.setupTimerDisplay(this.currentGroup.timerMinutes);
                 }
-            } else {
-                alert('Failed to extend timer: ' + result.error);
+                this.startTimer();
+            } catch (error) {
+                console.error('Failed to extend timer:', error);
             }
-        } catch (error) {
-            alert('Error extending timer');
-            console.error('Extend timer error:', error);
         }
-    }
-
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 }
 
-// Initialize browser manager
+// Initialize browser manager when DOM is loaded
 let browserManager;
 document.addEventListener('DOMContentLoaded', () => {
     browserManager = new BrowserManager();
 });
-
-// Handle window closing
-window.addEventListener('beforeunload', () => {
-    if (browserManager && browserManager.timerInterval) {
-        clearInterval(browserManager.timerInterval);
-    }
-});
-
-const webview = document.getElementById('webview');
-if (webview) {
-    webview.src = url;
-}

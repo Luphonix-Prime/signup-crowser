@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,110 +6,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Browser</title>
     <link rel="stylesheet" href="../styles/browser.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+    <script src="https://unpkg.com/feather-icons"></script>
 </head>
 <body>
     <div class="browser-container">
-        <!-- Top Bar -->
-        <div class="browser-header">
+        <!-- Header -->
+        <header class="browser-header">
             <div class="header-left">
-                <button id="back-btn" class="nav-btn" disabled title="Back">
+                <div class="group-info">
+                    <span id="group-name">Loading...</span>
+                    <div id="timer-display" class="timer-display hidden">
+                        <i data-feather="clock"></i>
+                        <span id="timer-text">00:00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="btn btn-secondary" onclick="browserManager.closeGroup()">
+                    <i data-feather="x"></i>
+                    Close Group
+                </button>
+            </div>
+        </header>
+
+        <!-- Navigation Bar -->
+        <nav class="browser-nav">
+            <div class="nav-controls">
+                <button class="nav-btn" onclick="browserManager.goBack()" title="Back">
                     <i data-feather="arrow-left"></i>
                 </button>
-                <button id="forward-btn" class="nav-btn" disabled title="Forward">
+                <button class="nav-btn" onclick="browserManager.goForward()" title="Forward">
                     <i data-feather="arrow-right"></i>
                 </button>
-                <button id="refresh-btn" class="nav-btn" title="Refresh">
+                <button class="nav-btn" onclick="browserManager.refresh()" title="Refresh">
                     <i data-feather="refresh-cw"></i>
                 </button>
             </div>
             
-            <div class="header-center">
-                <div class="address-bar">
-                    <input type="url" id="url-input" placeholder="Enter URL or search...">
-                    <button id="go-btn" title="Go">
-                        <i data-feather="arrow-right"></i>
-                    </button>
-                </div>
+            <div class="url-bar">
+                <input type="text" id="url-input" placeholder="Enter URL or search..." 
+                       onkeypress="if(event.key==='Enter') browserManager.navigate()">
+                <button class="nav-btn" onclick="browserManager.navigate()" title="Go">
+                    <i data-feather="arrow-right"></i>
+                </button>
             </div>
-            
-            <div class="header-right">
-                <div class="group-info">
-                    <span id="group-name"></span>
-                    <div id="timer-display" class="timer-display hidden">
-                        <i data-feather="clock"></i>
-                        <span id="timer-text">--:--</span>
-                    </div>
-                </div>
-                <button id="new-tab-btn" class="nav-btn" title="New Tab">
+
+            <div class="nav-actions">
+                <button class="nav-btn" onclick="browserManager.newTab()" title="New Tab">
                     <i data-feather="plus"></i>
                 </button>
-                <button id="close-group-btn" class="nav-btn nav-btn-danger" title="Close Group">
-                    <i data-feather="x"></i>
-                </button>
             </div>
+        </nav>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div id="tabs-list" class="tabs-list"></div>
         </div>
 
-        <!-- Tab Bar -->
-        <div class="tab-bar">
-            <div id="tabs-container" class="tabs-container">
-                <!-- Tabs will be added here -->
-            </div>
-            <button id="add-tab-btn" class="add-tab-btn" title="Add Tab">
-                <i data-feather="plus"></i>
-            </button>
-        </div>
-
-        <!-- Browser Content -->
-        <div class="browser-content">
+        <!-- Content Area -->
+        <div class="content-area">
+            <!-- Welcome Screen -->
             <div id="welcome-screen" class="welcome-screen">
                 <div class="welcome-content">
-                    <h2>Welcome to your Private Tab Group</h2>
-                    <p id="group-description">This is an isolated browsing session. No history will be saved.</p>
+                    <h2>Welcome to Privacy Browser</h2>
+                    <p>Your isolated browsing session is ready. Start by visiting a website or choosing from quick links below.</p>
                     
                     <div class="quick-links">
-                        <h3>Quick Start</h3>
-                        <div class="link-grid">
-                            <button class="quick-link" data-url="https://www.google.com">
-                                <i data-feather="search"></i>
-                                Google
-                            </button>
-                            <button class="quick-link" data-url="https://www.wikipedia.org">
-                                <i data-feather="book"></i>
-                                Wikipedia
-                            </button>
-                            <button class="quick-link" data-url="https://www.github.com">
-                                <i data-feather="github"></i>
-                                GitHub
-                            </button>
-                            <button class="quick-link" data-url="https://www.stackoverflow.com">
-                                <i data-feather="help-circle"></i>
-                                Stack Overflow
-                            </button>
-                        </div>
+                        <a href="#" class="quick-link" onclick="browserManager.navigateToUrl('https://www.google.com')">
+                            <i data-feather="search"></i>
+                            Google
+                        </a>
+                        <a href="#" class="quick-link" onclick="browserManager.navigateToUrl('https://www.duckduckgo.com')">
+                            <i data-feather="shield"></i>
+                            DuckDuckGo
+                        </a>
+                        <a href="#" class="quick-link" onclick="browserManager.navigateToUrl('https://www.wikipedia.org')">
+                            <i data-feather="book"></i>
+                            Wikipedia
+                        </a>
+                        <a href="#" class="quick-link" onclick="browserManager.navigateToUrl('https://news.ycombinator.com')">
+                            <i data-feather="message-square"></i>
+                            Hacker News
+                        </a>
                     </div>
 
                     <div class="privacy-info">
-                        <h3>Privacy Features</h3>
+                        <h3>Privacy Features Active</h3>
                         <ul>
-                            <li><i data-feather="shield"></i> No browsing history saved</li>
-                            <li><i data-feather="lock"></i> Isolated cookies and sessions</li>
-                            <li><i data-feather="clock"></i> Automatic cleanup on timer expiry</li>
-                            <li><i data-feather="eye-off"></i> No tracking between tab groups</li>
+                            <li>
+                                <i data-feather="shield-check"></i>
+                                No browsing history stored
+                            </li>
+                            <li>
+                                <i data-feather="clock"></i>
+                                Automatic session cleanup
+                            </li>
+                            <li>
+                                <i data-feather="lock"></i>
+                                Isolated cookies and storage
+                            </li>
+                            <li>
+                                <i data-feather="eye-off"></i>
+                                No tracking between tab groups
+                            </li>
                         </ul>
                     </div>
                 </div>
             </div>
-            
-            <div id="webview-container" class="webview-container hidden">
-                <!-- Webviews will be added here -->
-                <webview id="foo" src="https://www.github.com/" style="display:inline-flex; width:640px; height:480px"></webview>            </div>
-        </div>
 
-        <!-- Loading Overlay -->
-        <div id="loading-overlay" class="loading-overlay hidden">
-            <div class="spinner"></div>
-            <p>Loading...</p>
+            <!-- Webview Container -->
+            <div id="webview-container" class="webview-container hidden">
+                <!-- Webviews will be dynamically added here -->
+            </div>
         </div>
 
         <!-- Timer Alert -->
@@ -117,19 +126,23 @@
                 <div class="alert-icon">
                     <i data-feather="clock"></i>
                 </div>
-                <div class="alert-message">
-                    <h4>Tab Group Closing Soon</h4>
-                    <p id="alert-text">This tab group will close in 1 minute.</p>
+                <div class="alert-text">
+                    <h4>Timer Alert</h4>
+                    <p id="alert-text">Tab group will close soon.</p>
                 </div>
                 <div class="alert-actions">
-                    <button id="extend-timer" class="btn btn-primary">Extend</button>
-                    <button id="dismiss-alert" class="btn btn-secondary">Dismiss</button>
+                    <button class="btn btn-primary" onclick="browserManager.extendTimer()">
+                        <i data-feather="plus-circle"></i>
+                        Extend Timer
+                    </button>
+                    <button class="btn btn-secondary" onclick="browserManager.dismissAlert()">
+                        Dismiss
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/feather-icons"></script>
     <script src="browser.js"></script>
 </body>
 </html>
