@@ -14,6 +14,9 @@
             <div class="header-content">
                 <h1>Privacy Browser</h1>
                 <div class="header-actions">
+                    <button id="settings-btn" class="btn btn-icon" title="Settings">
+                        <i data-feather="settings"></i>
+                    </button>
                     <button id="refresh-groups" class="btn btn-icon" title="Refresh">
                         <i data-feather="refresh-cw"></i>
                     </button>
@@ -27,6 +30,22 @@
 
         <!-- Main Content -->
         <main class="dashboard-main">
+            <!-- Subscription Status -->
+            <section class="subscription-status">
+                <div class="subscription-card">
+                    <div class="subscription-info">
+                        <h3 id="subscription-plan">Free Plan</h3>
+                        <p id="subscription-details">Limited to 3 tab groups</p>
+                    </div>
+                    <div class="subscription-actions">
+                        <button id="upgrade-btn" class="btn btn-primary">
+                            <i data-feather="star"></i>
+                            Upgrade Plan
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             <!-- Quick Actions -->
             <section class="quick-actions">
                 <button id="create-group-btn" class="btn btn-primary btn-large">
@@ -51,6 +70,142 @@
                 </div>
             </section>
         </main>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Settings</h3>
+                    <button id="close-settings-modal" class="btn btn-icon">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="account">Account</button>
+                    <button class="settings-tab" data-tab="subscription">Subscription</button>
+                    <button class="settings-tab" data-tab="privacy">Privacy</button>
+                </div>
+                <div class="settings-content">
+                    <div id="account-settings" class="settings-panel active">
+                        <form id="account-settings-form">
+                            <div class="form-group">
+                                <label for="settings-username">Username</label>
+                                <input type="text" id="settings-username" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-email">Email</label>
+                                <input type="email" id="settings-email">
+                            </div>
+                            <div class="form-group">
+                                <label for="current-password">Current Password</label>
+                                <input type="password" id="current-password">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-password">New Password</label>
+                                <input type="password" id="new-password">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Account</button>
+                        </form>
+                    </div>
+                    <div id="subscription-settings" class="settings-panel">
+                        <div class="subscription-plans">
+                            <div class="plan-card">
+                                <h4>Free Plan</h4>
+                                <div class="plan-price">$0<span>/month</span></div>
+                                <ul class="plan-features">
+                                    <li>3 Tab Groups</li>
+                                    <li>Basic Privacy Features</li>
+                                    <li>Community Support</li>
+                                </ul>
+                                <button class="btn btn-secondary" disabled>Current Plan</button>
+                            </div>
+                            <div class="plan-card featured">
+                                <h4>Premium Plan</h4>
+                                <div class="plan-price">$9.99<span>/month</span></div>
+                                <ul class="plan-features">
+                                    <li>Unlimited Tab Groups</li>
+                                    <li>Advanced Privacy Features</li>
+                                    <li>Priority Support</li>
+                                    <li>Custom Themes</li>
+                                </ul>
+                                <button class="btn btn-primary" onclick="dashboardManager.showPaymentModal('premium')">Upgrade Now</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="privacy-settings" class="settings-panel">
+                        <form id="privacy-settings-form">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="clear-data-on-exit" checked>
+                                    Clear all data when closing tab groups
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="block-trackers" checked>
+                                    Block tracking scripts
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="disable-notifications">
+                                    Disable browser notifications
+                                </label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Privacy Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Modal -->
+        <div id="payment-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Upgrade to Premium</h3>
+                    <button id="close-payment-modal" class="btn btn-icon">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="payment-content">
+                    <div class="payment-summary">
+                        <h4>Premium Plan</h4>
+                        <div class="payment-amount">$9.99/month</div>
+                        <ul class="payment-features">
+                            <li>Unlimited Tab Groups</li>
+                            <li>Advanced Privacy Features</li>
+                            <li>Priority Support</li>
+                            <li>Custom Themes</li>
+                        </ul>
+                    </div>
+                    <form id="payment-form">
+                        <div class="form-group">
+                            <label for="card-number">Card Number</label>
+                            <input type="text" id="card-number" placeholder="1234 5678 9012 3456" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expiry-date">Expiry Date</label>
+                                <input type="text" id="expiry-date" placeholder="MM/YY" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" placeholder="123" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cardholder-name">Cardholder Name</label>
+                            <input type="text" id="cardholder-name" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancel-payment" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Subscribe Now</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <!-- Create Group Modal -->
         <div id="create-group-modal" class="modal hidden">

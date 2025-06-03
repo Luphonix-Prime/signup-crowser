@@ -9,7 +9,7 @@ class Database {
 
     async initialize() {
         const dbPath = path.join(app.getPath('userData'), 'privacy_browser.db');
-        
+
         return new Promise((resolve, reject) => {
             this.db = new sqlite3.Database(dbPath, (err) => {
                 if (err) {
@@ -28,6 +28,11 @@ class Database {
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
+                status TEXT DEFAULT 'active',
+                subscription TEXT DEFAULT 'free',
+                subscription_updated_at DATETIME,
+                last_login DATETIME,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )`,
             `CREATE TABLE IF NOT EXISTS tab_groups (
@@ -43,7 +48,41 @@ class Database {
                 user_id INTEGER NOT NULL,
                 session_token TEXT UNIQUE NOT NULL,
                 expires_at DATETIME NOT NULL,
+                last_activity DATETIME DEFAULT CURRENT_TIMESTAMP,
+                session_duration INTEGER DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            )`,
+            `CREATE TABLE IF NOT EXISTS payments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                plan TEXT NOT NULL,
+                amount DECIMAL(10,2) NOT NULL,
+                status TEXT DEFAULT 'pending',
+                card_last_four TEXT,
+                cardholder_name TEXT,
+                refunded_at DATETIME,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                expires_at DATETIME,
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            )`,
+            `CREATE TABLE IF NOT EXISTS user_activity (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                action TEXT NOT NULL,
+                metadata TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+            )`,
+            `CREATE TABLE IF NOT EXISTS app_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`,
+            `CREATE TABLE IF NOT EXISTS user_settings (
+                user_id INTEGER PRIMARY KEY,
+                settings TEXT NOT NULL,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             )`
         ];

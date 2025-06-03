@@ -74,9 +74,45 @@ body {
     width: 100%;
 }
 
+/* Subscription Status */
+.subscription-status {
+    margin-bottom: 2rem;
+}
+
+.subscription-card {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subscription-info h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.subscription-info p {
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.subscription-actions .btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.subscription-actions .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 /* Quick Actions */
 .quick-actions {
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
     text-align: center;
 }
 
@@ -478,41 +514,211 @@ body {
     background: hsl(var(--muted));
 }
 
+/* Settings Modal */
+.settings-tabs {
+    display: flex;
+    border-bottom: 1px solid hsl(var(--border));
+    margin-bottom: 1.5rem;
+}
+
+.settings-tab {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: none;
+    color: hsl(var(--muted-foreground));
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.settings-tab:hover {
+    color: hsl(var(--foreground));
+}
+
+.settings-tab.active {
+    color: hsl(var(--primary));
+    border-bottom-color: hsl(var(--primary));
+}
+
+.settings-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.settings-panel {
+    display: none;
+}
+
+.settings-panel.active {
+    display: block;
+}
+
+.subscription-plans {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.plan-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.plan-card.featured {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.05);
+}
+
+.plan-card.featured::before {
+    content: 'Recommended';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: hsl(var(--primary));
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.plan-card h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: hsl(var(--foreground));
+}
+
+.plan-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    margin-bottom: 1rem;
+}
+
+.plan-price span {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: hsl(var(--muted-foreground));
+}
+
+.plan-features {
+    list-style: none;
+    margin-bottom: 1.5rem;
+}
+
+.plan-features li {
+    padding: 0.5rem 0;
+    color: hsl(var(--foreground));
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.plan-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: hsl(var(--success));
+    font-weight: 600;
+}
+
+/* Payment Modal */
+.payment-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.payment-summary {
+    background: hsl(var(--muted));
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.payment-summary h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: hsl(var(--foreground));
+}
+
+.payment-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    margin-bottom: 1rem;
+}
+
+.payment-features {
+    list-style: none;
+}
+
+.payment-features li {
+    padding: 0.5rem 0;
+    color: hsl(var(--foreground));
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.payment-features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: hsl(var(--success));
+    font-weight: 600;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-main {
         padding: 1rem;
     }
-    
+
     .header-content {
         padding: 0 1rem;
     }
-    
+
     .tab-groups-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .card-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
-    
+
     .card-actions {
         margin-left: 0;
     }
-    
+
     .timer-alert,
     .notification {
         left: 1rem;
         right: 1rem;
         max-width: none;
     }
-    
+
     .form-actions {
         flex-direction: column;
     }
-    
+
     .form-actions .btn {
         width: 100%;
     }

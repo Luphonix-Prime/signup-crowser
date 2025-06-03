@@ -1,0 +1,341 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Browser - Admin Dashboard</title>
+    <link rel="stylesheet" href="../styles/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
+                <span class="admin-badge">Administrator</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                    <i data-feather="bar-chart-3"></i>
+                    Dashboard
+                </a>
+                <a href="#users" class="nav-item" data-section="users">
+                    <i data-feather="users"></i>
+                    User Management
+                </a>
+                <a href="#sessions" class="nav-item" data-section="sessions">
+                    <i data-feather="activity"></i>
+                    Active Sessions
+                </a>
+                <a href="#payments" class="nav-item" data-section="payments">
+                    <i data-feather="credit-card"></i>
+                    Payment Management
+                </a>
+                <a href="#settings" class="nav-item" data-section="settings">
+                    <i data-feather="settings"></i>
+                    Settings
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn btn-secondary">
+                    <i data-feather="log-out"></i>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="admin-section active">
+                <div class="section-header">
+                    <h1>Dashboard Overview</h1>
+                    <button id="refresh-data" class="btn btn-primary">
+                        <i data-feather="refresh-cw"></i>
+                        Refresh
+                    </button>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i data-feather="users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-users">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i data-feather="activity"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="active-sessions">0</h3>
+                            <p>Active Sessions</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i data-feather="dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="monthly-revenue">$0</h3>
+                            <p>Monthly Revenue</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i data-feather="clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="avg-session-time">0h</h3>
+                            <p>Avg Session Time</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>User Activity (Last 7 Days)</h3>
+                        <div id="activity-chart" class="chart-placeholder">Chart will be displayed here</div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Revenue Trends</h3>
+                        <div id="revenue-chart" class="chart-placeholder">Chart will be displayed here</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users-section" class="admin-section">
+                <div class="section-header">
+                    <h1>User Management</h1>
+                    <div class="header-actions">
+                        <input type="text" id="user-search" placeholder="Search users..." class="search-input">
+                        <button id="add-user-btn" class="btn btn-primary">
+                            <i data-feather="user-plus"></i>
+                            Add User
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Subscription</th>
+                                <th>Session Time</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Users will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Sessions Section -->
+            <section id="sessions-section" class="admin-section">
+                <div class="section-header">
+                    <h1>Active Sessions</h1>
+                    <button id="refresh-sessions" class="btn btn-secondary">
+                        <i data-feather="refresh-cw"></i>
+                        Refresh
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="sessions-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Session Start</th>
+                                <th>Duration</th>
+                                <th>Tab Groups</th>
+                                <th>Last Activity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessions-table-body">
+                            <!-- Sessions will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Payments Section -->
+            <section id="payments-section" class="admin-section">
+                <div class="section-header">
+                    <h1>Payment Management</h1>
+                    <div class="header-actions">
+                        <select id="payment-filter" class="filter-select">
+                            <option value="all">All Payments</option>
+                            <option value="active">Active Subscriptions</option>
+                            <option value="expired">Expired</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="payment-stats">
+                    <div class="payment-stat">
+                        <h3 id="total-revenue">$0</h3>
+                        <p>Total Revenue</p>
+                    </div>
+                    <div class="payment-stat">
+                        <h3 id="active-subscriptions">0</h3>
+                        <p>Active Subscriptions</p>
+                    </div>
+                    <div class="payment-stat">
+                        <h3 id="pending-payments">0</h3>
+                        <p>Pending Payments</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="payments-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Plan</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table-body">
+                            <!-- Payments will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="admin-section">
+                <div class="section-header">
+                    <h1>System Settings</h1>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>General Settings</h3>
+                        <form id="general-settings-form">
+                            <div class="form-group">
+                                <label for="app-name">Application Name</label>
+                                <input type="text" id="app-name" value="Privacy Browser">
+                            </div>
+                            <div class="form-group">
+                                <label for="max-tab-groups">Max Tab Groups per User</label>
+                                <input type="number" id="max-tab-groups" value="10" min="1" max="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="session-timeout">Session Timeout (hours)</label>
+                                <input type="number" id="session-timeout" value="24" min="1" max="168">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save General Settings</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Payment Settings</h3>
+                        <form id="payment-settings-form">
+                            <div class="form-group">
+                                <label for="basic-plan-price">Basic Plan Price ($)</label>
+                                <input type="number" id="basic-plan-price" value="9.99" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="premium-plan-price">Premium Plan Price ($)</label>
+                                <input type="number" id="premium-plan-price" value="19.99" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="trial-period">Trial Period (days)</label>
+                                <input type="number" id="trial-period" value="7" min="0" max="30">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Payment Settings</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Security Settings</h3>
+                        <form id="security-settings-form">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="force-2fa" checked>
+                                    Force Two-Factor Authentication
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="auto-logout" checked>
+                                    Auto-logout Inactive Sessions
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="password-policy">Password Minimum Length</label>
+                                <input type="number" id="password-policy" value="8" min="6" max="20">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Security Settings</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Add User Modal -->
+        <div id="add-user-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add New User</h3>
+                    <button id="close-add-user-modal" class="btn btn-icon">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <form id="add-user-form">
+                    <div class="form-group">
+                        <label for="new-username">Username</label>
+                        <input type="text" id="new-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-email">Email</label>
+                        <input type="email" id="new-email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">Password</label>
+                        <input type="password" id="new-password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-role">Role</label>
+                        <select id="user-role" name="role">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-add-user" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

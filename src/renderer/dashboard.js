@@ -30,12 +30,55 @@ class DashboardManager {
         });
 
         // Other actions
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            this.showSettingsModal();
+        });
+
         document.getElementById('refresh-groups').addEventListener('click', () => {
             this.loadTabGroups();
         });
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             this.handleLogout();
+        });
+
+        document.getElementById('upgrade-btn').addEventListener('click', () => {
+            this.showPaymentModal('premium');
+        });
+
+        // Settings modal
+        document.getElementById('close-settings-modal').addEventListener('click', () => {
+            this.hideSettingsModal();
+        });
+
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                this.switchSettingsTab(tab.dataset.tab);
+            });
+        });
+
+        document.getElementById('account-settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.updateAccountSettings();
+        });
+
+        document.getElementById('privacy-settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.updatePrivacySettings();
+        });
+
+        // Payment modal
+        document.getElementById('close-payment-modal').addEventListener('click', () => {
+            this.hidePaymentModal();
+        });
+
+        document.getElementById('cancel-payment').addEventListener('click', () => {
+            this.hidePaymentModal();
+        });
+
+        document.getElementById('payment-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.processPayment();
         });
 
         // Timer alert actions
@@ -54,10 +97,24 @@ class DashboardManager {
             }
         });
 
+        document.getElementById('settings-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'settings-modal') {
+                this.hideSettingsModal();
+            }
+        });
+
+        document.getElementById('payment-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'payment-modal') {
+                this.hidePaymentModal();
+            }
+        });
+
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.hideCreateGroupModal();
+                this.hideSettingsModal();
+                this.hidePaymentModal();
                 this.hideTimerAlert();
             }
         });
@@ -84,6 +141,7 @@ class DashboardManager {
             if (result.success) {
                 this.tabGroups = result.groups;
                 this.renderTabGroups();
+                this.updateSubscriptionStatus(result.userInfo);
             } else {
                 this.showError('Failed to load tab groups: ' + result.error);
             }
@@ -92,6 +150,169 @@ class DashboardManager {
             console.error('Load groups error:', error);
         }
         
+        this.showLoading(false);
+    }
+
+    updateSubscriptionStatus(userInfo) {
+        if (userInfo) {
+            const planElement = document.getElementById('subscription-plan');
+            const detailsElement = document.getElementById('subscription-details');
+            
+            if (userInfo.subscription === 'premium') {
+                planElement.textContent = 'Premium Plan';
+                detailsElement.textContent = 'Unlimited tab groups and advanced features';
+                document.getElementById('upgrade-btn').style.display = 'none';
+            } else {
+                planElement.textContent = 'Free Plan';
+                detailsElement.textContent = `${this.tabGroups.length}/3 tab groups used`;
+                document.getElementById('upgrade-btn').style.display = 'block';
+            }
+        }
+    }
+
+    showSettingsModal() {
+        document.getElementById('settings-modal').classList.remove('hidden');
+        this.loadUserSettings();
+    }
+
+    hideSettingsModal() {
+        document.getElementById('settings-modal').classList.add('hidden');
+    }
+
+    switchSettingsTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+        // Update panels
+        document.querySelectorAll('.settings-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
+        document.getElementById(`${tabName}-settings`).classList.add('active');
+    }
+
+    async loadUserSettings() {
+        try {
+            const result = await window.electronAPI.getUserSettings();
+            
+            if (result.success) {
+                const settings = result.settings;
+                document.getElementById('settings-username').value = settings.username || '';
+                document.getElementById('settings-email').value = settings.email || '';
+                document.getElementById('clear-data-on-exit').checked = settings.clearDataOnExit ?? true;
+                document.getElementById('block-trackers').checked = settings.blockTrackers ?? true;
+                document.getElementById('disable-notifications').checked = settings.disableNotifications ?? false;
+            }
+        } catch (error) {
+            this.showError('Failed to load user settings');
+            console.error('Load settings error:', error);
+        }
+    }
+
+    async updateAccountSettings() {
+        const formData = new FormData(document.getElementById('account-settings-form'));
+        
+        const settings = {
+            email: formData.get('email') || document.getElementById('settings-email').value,
+            currentPassword: document.getElementById('current-password').value,
+            newPassword: document.getElementById('new-password').value
+        };
+
+        if (settings.newPassword && !settings.currentPassword) {
+            this.showError('Current password is required to change password');
+            return;
+        }
+
+        this.showLoading(true);
+
+        try {
+            const result = await window.electronAPI.updateAccountSettings(settings);
+            
+            if (result.success) {
+                this.showSuccess('Account settings updated successfully');
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+            } else {
+                this.showError('Failed to update account settings: ' + result.error);
+            }
+        } catch (error) {
+            this.showError('An error occurred while updating account settings');
+            console.error('Update account error:', error);
+        }
+
+        this.showLoading(false);
+    }
+
+    async updatePrivacySettings() {
+        const settings = {
+            clearDataOnExit: document.getElementById('clear-data-on-exit').checked,
+            blockTrackers: document.getElementById('block-trackers').checked,
+            disableNotifications: document.getElementById('disable-notifications').checked
+        };
+
+        this.showLoading(true);
+
+        try {
+            const result = await window.electronAPI.updatePrivacySettings(settings);
+            
+            if (result.success) {
+                this.showSuccess('Privacy settings updated successfully');
+            } else {
+                this.showError('Failed to update privacy settings: ' + result.error);
+            }
+        } catch (error) {
+            this.showError('An error occurred while updating privacy settings');
+            console.error('Update privacy error:', error);
+        }
+
+        this.showLoading(false);
+    }
+
+    showPaymentModal(plan) {
+        document.getElementById('payment-modal').classList.remove('hidden');
+    }
+
+    hidePaymentModal() {
+        document.getElementById('payment-modal').classList.add('hidden');
+        document.getElementById('payment-form').reset();
+    }
+
+    async processPayment() {
+        const formData = new FormData(document.getElementById('payment-form'));
+        
+        const paymentData = {
+            cardNumber: formData.get('card-number') || document.getElementById('card-number').value,
+            expiryDate: formData.get('expiry-date') || document.getElementById('expiry-date').value,
+            cvv: formData.get('cvv') || document.getElementById('cvv').value,
+            cardholderName: formData.get('cardholder-name') || document.getElementById('cardholder-name').value,
+            plan: 'premium'
+        };
+
+        // Basic validation
+        if (!paymentData.cardNumber || !paymentData.expiryDate || !paymentData.cvv || !paymentData.cardholderName) {
+            this.showError('Please fill in all payment details');
+            return;
+        }
+
+        this.showLoading(true);
+
+        try {
+            const result = await window.electronAPI.processPayment(paymentData);
+            
+            if (result.success) {
+                this.hidePaymentModal();
+                this.showSuccess('Payment processed successfully! Welcome to Premium!');
+                this.loadTabGroups(); // Refresh to update subscription status
+            } else {
+                this.showError('Payment failed: ' + result.error);
+            }
+        } catch (error) {
+            this.showError('An error occurred while processing payment');
+            console.error('Payment error:', error);
+        }
+
         this.showLoading(false);
     }
 
