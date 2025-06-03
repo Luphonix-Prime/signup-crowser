@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Browser - Demo</title>
+    <style>
+        /* Demo Styles */
+        :root {
+            --background: 210 11% 98%; 
+            --foreground: 215 20% 15%; 
+            --muted: 210 8% 90%; 
+            --muted-foreground: 215 10% 45%; 
+            --border: 214 12% 88%; 
+            --input: 0 0% 100%; 
+            --primary: 210 100% 55%; 
+            --primary-foreground: 0 0% 100%; 
+            --secondary: 210 8% 95%; 
+            --secondary-foreground: 215 15% 35%; 
+            --success: 142 76% 36%; 
+            --error: 0 72% 51%; 
+            --warning: 45 93% 47%; 
+            --card: 0 0% 100%; 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: hsl(var(--card));
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: hsl(var(--primary));
+            margin-bottom: 1rem;
+        }
+
+        .demo-header p {
+            font-size: 1.1rem;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 2rem;
+        }
+
+        .demo-modes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .demo-mode {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .demo-mode:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-color: hsl(var(--primary));
+        }
+
+        .demo-mode h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: hsl(var(--foreground));
+        }
+
+        .demo-mode p {
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .btn-primary:hover {
+            background: hsl(var(--primary) / 0.9);
+            transform: translateY(-1px);
+        }
+
+        .demo-section {
+            margin-bottom: 3rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: hsl(var(--primary) / 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: hsl(var(--primary));
+            font-size: 1.5rem;
+        }
+
+        .feature-card h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: hsl(var(--foreground));
+        }
+
+        .feature-card p {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.9rem;
+        }
+
+        .demo-interface {
+            display: none;
+            background: hsl(var(--card));
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            margin-top: 2rem;
+        }
+
+        .demo-interface.active {
+            display: block;
+        }
+
+        .interface-header {
+            background: hsl(var(--secondary));
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .interface-title {
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .interface-content {
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .back-btn {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .back-btn:hover {
+            background: hsl(var(--secondary) / 0.8);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .demo-header h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-modes {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Main Demo Interface -->
+        <div id="main-demo" class="demo-main">
+            <div class="demo-header">
+                <h1>Privacy Browser</h1>
+                <p>A privacy-focused browser with isolated tab groups, automatic timers, and no browsing history retention</p>
+                <div class="btn btn-primary" onclick="showOverview()">View Features Overview</div>
+            </div>
+
+            <div class="demo-modes">
+                <div class="demo-mode" onclick="showInterface('auth')">
+                    <h3>🔐 Authentication</h3>
+                    <p>See the user registration and login interface with secure password handling</p>
+                    <div class="btn btn-primary">View Auth Interface</div>
+                </div>
+
+                <div class="demo-mode" onclick="showInterface('dashboard')">
+                    <h3>📊 Dashboard</h3>
+                    <p>Explore the main dashboard where users create and manage tab groups</p>
+                    <div class="btn btn-primary">View Dashboard</div>
+                </div>
+
+                <div class="demo-mode" onclick="showInterface('browser')">
+                    <h3>🌐 Browser Interface</h3>
+                    <p>Experience the isolated browser window with tab management and timer features</p>
+                    <div class="btn btn-primary">View Browser</div>
+                </div>
+            </div>
+
+            <!-- Features Overview -->
+            <div id="features-overview" class="demo-section hidden">
+                <h2 style="text-align: center; margin-bottom: 2rem; color: hsl(var(--foreground));">Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h4>User Authentication</h4>
+                        <p>Secure login system with bcrypt password hashing and session management</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📁</div>
+                        <h4>Tab Group Management</h4>
+                        <p>Create isolated browsing sessions with separate cookies and storage</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⏰</div>
+                        <h4>Auto-Close Timers</h4>
+                        <p>Set automatic timers to close tab groups and clear all session data</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🛡️</div>
+                        <h4>No History Storage</h4>
+                        <p>Complete privacy with no browsing history or persistent tracking</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🗄️</div>
+                        <h4>SQLite Database</h4>
+                        <p>Local data storage for user accounts and tab group configurations</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h4>Electron Framework</h4>
+                        <p>Cross-platform desktop application built with modern web technologies</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auth Interface Demo -->
+        <div id="auth-interface" class="demo-interface">
+            <div class="interface-header">
+                <div class="interface-title">Authentication Interface</div>
+                <button class="back-btn" onclick="showMain()">← Back to Demo</button>
+            </div>
+            <div class="interface-content">
+                <iframe src="src/renderer/auth.html" style="width: 100%; height: 500px; border: none; border-radius: 8px;"></iframe>
+            </div>
+        </div>
+
+        <!-- Dashboard Interface Demo -->
+        <div id="dashboard-interface" class="demo-interface">
+            <div class="interface-header">
+                <div class="interface-title">Dashboard Interface</div>
+                <button class="back-btn" onclick="showMain()">← Back to Demo</button>
+            </div>
+            <div class="interface-content">
+                <iframe src="src/renderer/dashboard.html" style="width: 100%; height: 500px; border: none; border-radius: 8px;"></iframe>
+            </div>
+        </div>
+
+        <!-- Browser Interface Demo -->
+        <div id="browser-interface" class="demo-interface">
+            <div class="interface-header">
+                <div class="interface-title">Browser Interface</div>
+                <button class="back-btn" onclick="showMain()">← Back to Demo</button>
+            </div>
+            <div class="interface-content">
+                <iframe src="src/renderer/browser.html" style="width: 100%; height: 500px; border: none; border-radius: 8px;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showInterface(type) {
+            document.getElementById('main-demo').classList.add('hidden');
+            document.getElementById(`${type}-interface`).classList.add('active');
+        }
+
+        function showMain() {
+            document.getElementById('main-demo').classList.remove('hidden');
+            document.querySelectorAll('.demo-interface').forEach(el => {
+                el.classList.remove('active');
+            });
+        }
+
+        function showOverview() {
+            const overview = document.getElementById('features-overview');
+            overview.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>

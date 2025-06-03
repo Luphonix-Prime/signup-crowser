@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Browser - Dashboard</title>
+    <link rel="stylesheet" href="../styles/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>Privacy Browser</h1>
+                <div class="header-actions">
+                    <button id="refresh-groups" class="btn btn-icon" title="Refresh">
+                        <i data-feather="refresh-cw"></i>
+                    </button>
+                    <button id="logout-btn" class="btn btn-secondary">
+                        <i data-feather="log-out"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Quick Actions -->
+            <section class="quick-actions">
+                <button id="create-group-btn" class="btn btn-primary btn-large">
+                    <i data-feather="plus"></i>
+                    Create New Tab Group
+                </button>
+            </section>
+
+            <!-- Tab Groups Grid -->
+            <section class="tab-groups-section">
+                <h2>Your Tab Groups</h2>
+                <div id="tab-groups-grid" class="tab-groups-grid">
+                    <!-- Tab groups will be populated here -->
+                </div>
+                <div id="empty-state" class="empty-state hidden">
+                    <i data-feather="folder"></i>
+                    <h3>No Tab Groups Yet</h3>
+                    <p>Create your first tab group to start browsing privately with isolated sessions.</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('create-group-btn').click()">
+                        Create Tab Group
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Create Group Modal -->
+        <div id="create-group-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Tab Group</h3>
+                    <button id="close-modal" class="btn btn-icon">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <form id="create-group-form">
+                    <div class="form-group">
+                        <label for="group-name">Group Name</label>
+                        <input type="text" id="group-name" name="name" required placeholder="e.g., Work, Personal, Research">
+                    </div>
+                    <div class="form-group">
+                        <label for="timer-minutes">Auto-close Timer (minutes)</label>
+                        <input type="number" id="timer-minutes" name="timerMinutes" min="0" max="1440" placeholder="0 = No timer">
+                        <small>Set to 0 to disable auto-close timer. Maximum 1440 minutes (24 hours).</small>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancel-create" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Group</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Timer Alert -->
+        <div id="timer-alert" class="timer-alert hidden">
+            <div class="alert-content">
+                <div class="alert-icon">
+                    <i data-feather="clock"></i>
+                </div>
+                <div class="alert-message">
+                    <h4>Tab Group Closing Soon</h4>
+                    <p id="alert-message-text"></p>
+                </div>
+                <div class="alert-actions">
+                    <button id="extend-timer-btn" class="btn btn-primary">Extend Timer</button>
+                    <button id="dismiss-alert-btn" class="btn btn-secondary">Dismiss</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
