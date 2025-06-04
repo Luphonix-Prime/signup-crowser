@@ -254,7 +254,11 @@ class BrowserManager {
         webview.style.top = '0';
         webview.style.left = '0';
         webview.style.zIndex = '1';
-        webview.style.display= 'flex';
+        webview.style.display = "flex";
+        webview.style.flexDirection = "column";
+        webview.style.flexWrap = "nowrap";
+        webview.style.alignContent = "stretch";
+        webview.style.justifyContent = "flex-start";
 
         // Add event listeners
         webview.addEventListener('did-start-loading', () => {
