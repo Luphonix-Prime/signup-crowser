@@ -27,7 +27,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onGroupLoaded: (callback) => ipcRenderer.on('group:loaded', callback),
 
     // Remove listeners
-    removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel)
+    removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
+    // Admin Panel
+    openAdminPanel: () => ipcRenderer.invoke('admin:open'),
 });
 
 contextBridge.exposeInMainWorld('electron', {

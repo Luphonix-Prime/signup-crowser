@@ -344,6 +344,23 @@ app.on('activate', () => {
         new PrivacyBrowser();
     }
 });
+// Add this in setupIPC() section
+ipcMain.handle('admin:open', async () => {
+    const adminWindow = new BrowserWindow({
+        width: 1000,
+        height: 800,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: true,
+            preload: path.join(__dirname, 'preload.js')
+        }
+    });
+
+    await adminWindow.loadFile('src/renderer/admin.html');
+    return { status: 'success' };
+});
 
 // Initialize the application
 new PrivacyBrowser();
+
+  

@@ -155,7 +155,7 @@ class BrowserManager {
         // Show active webview or welcome screen
         const activeWebview = this.webviews.get(tabId);
         if (activeWebview) {
-            activeWebview.style.display = 'block';
+            activeWebview.style.display = 'flex';
             this.hideWelcomeScreen();
             
             // Update URL input
@@ -254,7 +254,7 @@ class BrowserManager {
         webview.style.top = '0';
         webview.style.left = '0';
         webview.style.zIndex = '1';
-        webview.style.display = 'none';
+        webview.style.display= 'flex';
 
         // Add event listeners
         webview.addEventListener('did-start-loading', () => {
