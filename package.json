@@ -1,23 +1,38 @@
 {
-  "name": "workspace",
-  "version": "1.0.0",
+  "name": "browser-test",
+  "version": "1.1.0",
   "main": "main.js",
+  "description": "A mini browser that shows the usage of [webview](https://github.com/atom/electron/blob/master/docs/api/webview-tag.md) in an app.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron . ",
-    "trace": "electron . --trace-warnings ...",
-    "build": "node build-installer.js build"
+    "start": "electron .",
+    "dev": "electron . --trace-warnings ... ",
+    "build": "electron-builder --win --dir",
+    "dist": "electron-builder --dir --win --mac --linux --publish always",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "com.aphelion.yourapp",
+    "productName": "YourAppName",
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "devDependencies": {
+    "electron": "^36.3.2",
+    "electron-builder": "^26.0.12",
+    "electron-rebuild": "^3.2.9",
+    "electronmon": "^2.0.3"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "electron": "^36.3.1",
     "sqlite3": "^5.1.7"
-  },
-  "devDependencies": {
-    "@electron-forge/cli": "^7.8.1"
   }
 }

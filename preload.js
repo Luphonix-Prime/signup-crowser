@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
     // Admin Panel
     openAdminPanel: () => ipcRenderer.invoke('admin:open'),
+    adminLogin: (credentials) => ipcRenderer.invoke('admin:login', credentials),
 });
 
 contextBridge.exposeInMainWorld('electron', {
